@@ -7,6 +7,8 @@
  * variants out of raw Windows formats (copied files arrive as FileNameW).
  */
 import { clipboard } from 'electron'
+import { execSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import type { ItemData } from '../../shared/types'
 
 /** Windows clipboard format name for a copied-file list. */
@@ -17,8 +19,39 @@ function readFileList(): string[] | null {
   try {
     const buf = clipboard.readBuffer(CF_FILE_LIST)
     if (!buf || buf.length < 4) return null
-    // FileNameW is a null-terminated UTF-16LE wide string. Multiple files are
-    // separated by NUL chars; the whole blob ends with a double NUL.
+
+    if (process.platform === 'win32') {
+      try {
+        // Retrieve the full list of files from the system clipboard using PowerShell
+        // to bypass Electron's built-in single file limit.
+        const stdout = execSync(
+          'powershell.exe -NoProfile -NonInteractive -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::GetFileDropList()"',
+          { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000 }
+        )
+        const paths = stdout
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0 && existsSync(line))
+        if (paths.length > 0) return paths
+      } catch (err) {
+        console.error('[formats] Failed to read file drop list via PowerShell:', err)
+      }
+    }
+
+    // Fallback: parse the FileNameW buffer directly (only gets the first file on Windows)
+    const wide = buf.toString('utf16le')
+    const parts = wide.split('\u0000').map((s) => s.trim()).filter(Boolean)
+    return parts.length ? parts : null
+  } catch {
+    return null
+  }
+}
+
+/** Fast, non-blocking check of FileNameW contents for clipboard signatures. */
+function readFileListFast(): string[] | null {
+  try {
+    const buf = clipboard.readBuffer(CF_FILE_LIST)
+    if (!buf || buf.length < 4) return null
     const wide = buf.toString('utf16le')
     const parts = wide.split('\u0000').map((s) => s.trim()).filter(Boolean)
     return parts.length ? parts : null
@@ -234,7 +267,8 @@ export function clipboardSignature(): string {
   const fmtKey = formats.slice().sort().join('\x1f')
 
   // If files are on the clipboard, their paths are the most stable fingerprint.
-  const files = readFileList()
+  // Use fast, non-blocking read to avoid spawning a child process during polling.
+  const files = readFileListFast()
   if (files && files.length) {
     return `files:${files.join('\n')}`
   }

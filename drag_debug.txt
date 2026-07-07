@@ -1323,3 +1323,89 @@
 [2026-07-05T15:41:55.693Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
 [2026-07-05T15:41:55.694Z] createFileStackDragIcon calling Resvg for count=1
 [2026-07-05T15:41:55.858Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:30:04.318Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:30:04.775Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:30:04.777Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:30:04.928Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:30:04.929Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:30:05.066Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:30:19.116Z] startDragOut called for kind=files
+[2026-07-07T12:30:19.117Z] staged: file=C:\Users\yadav\Downloads\RESUME_ARCHITECT_MASTER.md, files=["C:\\Users\\yadav\\Downloads\\RESUME_ARCHITECT_MASTER.md"]
+[2026-07-07T12:30:19.117Z] dragIcon called for kind=files
+[2026-07-07T12:30:19.117Z] files check: count=1, paths=["C:\\Users\\yadav\\Downloads\\RESUME_ARCHITECT_MASTER.md"]
+[2026-07-07T12:30:19.118Z] createFileStackDragIcon returning cached for stack|dark|text|1
+[2026-07-07T12:30:19.118Z] dragIcon result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:30:19.118Z] calling sender.startDrag with item.file=C:\Users\yadav\Downloads\RESUME_ARCHITECT_MASTER.md, item.files=["C:\\Users\\yadav\\Downloads\\RESUME_ARCHITECT_MASTER.md"]
+[2026-07-07T12:30:31.499Z] startDragOut called for kind=files
+[2026-07-07T12:30:31.500Z] staged: file=C:\Users\yadav\Downloads\V0Bn101.svg, files=["C:\\Users\\yadav\\Downloads\\V0Bn101.svg"]
+[2026-07-07T12:30:31.501Z] dragIcon called for kind=files
+[2026-07-07T12:30:31.502Z] files check: count=1, paths=["C:\\Users\\yadav\\Downloads\\V0Bn101.svg"]
+[2026-07-07T12:30:31.502Z] createFileStackDragIcon returning cached for stack|dark|image|1
+[2026-07-07T12:30:31.503Z] dragIcon result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:30:31.503Z] calling sender.startDrag with item.file=C:\Users\yadav\Downloads\V0Bn101.svg, item.files=["C:\\Users\\yadav\\Downloads\\V0Bn101.svg"]
+[2026-07-07T12:35:04.849Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:35:05.156Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:35:05.156Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:35:05.302Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:35:05.303Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:35:05.433Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:41:45.873Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:41:46.034Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:41:46.034Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:41:46.204Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:41:46.205Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:41:46.354Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:42:31.510Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:42:31.674Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:42:31.675Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:42:31.818Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:42:31.819Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:42:31.968Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:43:13.882Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:43:14.054Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:43:14.055Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:43:14.194Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:43:14.195Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:43:14.360Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:46:37.986Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:46:38.524Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:46:38.525Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:46:38.747Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:46:38.748Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:46:38.970Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:50:42.230Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:50:42.589Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:50:42.590Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:50:42.729Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T12:50:42.730Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T12:50:42.866Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T13:06:19.716Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T13:06:20.043Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T13:06:20.044Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T13:06:20.181Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T13:06:20.181Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T13:06:20.319Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T14:01:17.587Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T14:01:17.971Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T14:01:17.972Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T14:01:18.125Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T14:01:18.125Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T14:01:18.262Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T14:49:01.795Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T14:49:02.148Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T14:49:02.148Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T14:49:02.290Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T14:49:02.291Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T14:49:02.427Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T19:40:31.417Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T19:40:32.872Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T19:40:32.873Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T19:40:33.187Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T19:40:33.188Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T19:40:33.468Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T19:46:05.889Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T19:46:06.259Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T19:46:06.260Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T19:46:06.414Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-07T19:46:06.415Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-07T19:46:06.574Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}

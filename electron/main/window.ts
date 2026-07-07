@@ -61,14 +61,14 @@ export function setInteractive(value: boolean): void {
   if (value) {
     // Panel is open: disable click-through so user can interact.
     mainWindow.setIgnoreMouseEvents(false)
-    mainWindow.setAlwaysOnTop(true, 'screen-saver')
+    mainWindow.setAlwaysOnTop(true, 'floating')
   } else {
     // Panel is closed: full click-through, no forwarding needed.
     // Cursor edge detection is done by the main-process poll (startCursorPoll)
     // via screen.getCursorScreenPoint() + IPC, so forward:true is not required
     // and omitting it ensures Windows passes ALL mouse clicks to apps beneath.
     mainWindow.setIgnoreMouseEvents(true, { forward: false })
-    mainWindow.setAlwaysOnTop(true, 'screen-saver')
+    mainWindow.setAlwaysOnTop(true, 'floating')
   }
 }
 
@@ -191,7 +191,7 @@ export function createWindow(): BrowserWindow {
 
   // Respect OS-level always-on-top reordering.
   mainWindow.on('focus', () => {
-    mainWindow?.setAlwaysOnTop(true, 'screen-saver')
+    mainWindow?.setAlwaysOnTop(true, 'floating')
   })
 
   // Open external links in the default browser.
@@ -210,7 +210,7 @@ export function createWindow(): BrowserWindow {
   mainWindow.once('ready-to-show', () => {
     if (!mainWindow) return
     mainWindow.show()
-    mainWindow.setAlwaysOnTop(true, 'screen-saver')
+    mainWindow.setAlwaysOnTop(true, 'floating')
   })
 
   mainWindow.webContents.on('console-message', (_event, _level, message, line, sourceId) => {
@@ -233,7 +233,7 @@ export function createWindow(): BrowserWindow {
   heartbeatTimer = setInterval(() => {
     if (runtime.quitting) return
     if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
-      mainWindow.setAlwaysOnTop(true, 'screen-saver')
+      mainWindow.setAlwaysOnTop(true, 'floating')
     }
     if (detectorWindow && !detectorWindow.isDestroyed() && detectorWindow.isVisible()) {
       detectorWindow.setAlwaysOnTop(true, 'normal')
@@ -255,7 +255,7 @@ export function setVisible(visible: boolean): void {
   if (!mainWindow) return
   if (visible) {
     mainWindow.showInactive()
-    mainWindow.setAlwaysOnTop(true, 'screen-saver')
+    mainWindow.setAlwaysOnTop(true, 'floating')
   } else {
     mainWindow.hide()
   }

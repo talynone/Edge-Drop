@@ -101,6 +101,10 @@ export function registerIpc(): void {
     writeItemToClipboard(item.data)
     console.log('[IPC] item:copy wrote to clipboard, kind=', item.data.kind)
 
+    // Promote the copied item to the top of the history stack
+    getStore().add(item.data, loadSettings().historyLimit)
+    pushState.items()
+
     // Unpause after a short delay to allow OS clipboard event to settle.
     // Respect the current incognito state when unpausing.
     setTimeout(() => {
@@ -142,6 +146,13 @@ export function registerIpc(): void {
 
     if (!wrote) return false
 
+    // Promote the parent item to the top of the history stack
+    const parentItem = getStore().get(req.id)
+    if (parentItem) {
+      getStore().add(parentItem.data, loadSettings().historyLimit)
+      pushState.items()
+    }
+
     const watcher = getWatcher()
     watcher.setPaused(true)
     setTimeout(() => {
@@ -162,6 +173,10 @@ export function registerIpc(): void {
     try {
       writeItemToClipboard(item.data)
       console.log('[IPC] item:paste wrote to clipboard, kind=', item.data.kind)
+
+      // Promote the pasted item to the top of the history stack
+      getStore().add(item.data, loadSettings().historyLimit)
+      pushState.items()
 
       // Close panel via toggle so focus returns to the user's active input/text box
       pushState.togglePanel()
@@ -210,6 +225,13 @@ export function registerIpc(): void {
       }
 
       if (!wrote) return false
+
+      // Promote the parent item to the top of the history stack
+      const parentItem = getStore().get(req.id)
+      if (parentItem) {
+        getStore().add(parentItem.data, loadSettings().historyLimit)
+        pushState.items()
+      }
 
       pushState.togglePanel()
 
