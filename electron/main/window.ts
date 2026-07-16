@@ -27,6 +27,8 @@ import { join } from 'node:path'
 import { APP_CONFIG } from './config'
 import { runtime } from './config'
 import { PATHS } from '../store/paths'
+import { computeStickBounds } from './geometry'
+import { loadSettings, saveSettings } from '../store/settings'
 
 export const PANEL_WIDTH = 384
 /** Visual width of the blade when collapsed (only used by the renderer). */
@@ -134,24 +136,41 @@ export function startCursorPoll(): void {
     // Guard against garbage values that Windows occasionally sends.
     if (clientX < -1000 || clientX > 10000 || clientY < -1000 || clientY > 10000) return
 
-    const inEdge = clientX <= currentHotZoneWidth
+    const settings = loadSettings()
+
+    let inEdge = false
+    switch (settings.stickPosition) {
+      case 'left':
+        inEdge = clientX <= currentHotZoneWidth
+        break
+      case 'right':
+        inEdge = (wa.width - clientX) <= currentHotZoneWidth
+        break
+      case 'top':
+        inEdge = clientY <= currentHotZoneWidth && Math.abs(clientX - wa.width / 2) <= PANEL_WIDTH / 2
+        break
+    }
+
     const newState = inEdge
 
-    // Keep streaming the cursor position to the renderer while it is near the
-    // edge (so opening works) OR while the panel is open (so closing works in
-    // EVERY direction). Previously we only streamed while clientX <= 60, which
-    // froze the renderer's last-known position the moment the cursor moved to
-    // the right past 60px — so it never learned the cursor had left and the
-    // blade refused to retract horizontally. When the panel is closed and the
-    // cursor is away from the edge we stop streaming to avoid needless IPC.
-    if (clientX <= 450 || interactive || newState !== lastEdgeState) {
+    // Stream cursor position while near the edge (opening), while open (closing),
+    // or when edge state changes. The near-edge check adapts to stick position.
+    const nearEdge = settings.stickPosition === 'top'
+      ? clientY <= 450
+      : settings.stickPosition === 'right'
+        ? (wa.width - clientX) <= 450
+        : clientX <= 450
+    if (nearEdge || interactive || newState !== lastEdgeState) {
       lastEdgeState = newState
       if (!mainWindow.webContents.isDestroyed()) {
         mainWindow.webContents.send('window:cursor-edge', {
           x: clientX,
           y: clientY,
           inEdge,
-          inZone: true
+          inZone: true,
+          stickPosition: settings.stickPosition,
+          displayWidth: wa.width,
+          displayHeight: wa.height
         })
       }
     }
@@ -165,20 +184,36 @@ export function stopCursorPoll(): void {
   }
 }
 
-/** Compute geometry anchored to the left edge of the primary display. */
-function edgeGeometry(): { x: number; y: number; width: number; height: number } {
-  const display = screen.getPrimaryDisplay()
-  const workArea = display.workArea
-  return {
-    x: workArea.x,
-    y: workArea.y,
-    width: PANEL_WIDTH,
-    height: workArea.height
+function getStickGeometry(): { x: number; y: number; width: number; height: number } {
+  const settings = loadSettings()
+  const allDisplays = screen.getAllDisplays().map(d => ({
+    id: d.id,
+    workArea: { ...d.workArea }
+  }))
+
+  const primaryHeight = screen.getPrimaryDisplay().workArea.height
+  const windowHeight = settings.stickPosition === 'top'
+    ? Math.max(320, Math.round(settings.panelHeight * primaryHeight))
+    : primaryHeight
+
+  const result = computeStickBounds({
+    position: settings.stickPosition,
+    displays: allDisplays,
+    displayId: settings.stickDisplayId,
+    windowWidth: PANEL_WIDTH,
+    windowHeight,
+    currentBounds: getMainWindow()?.getBounds()
+  })
+
+  if (result.displayId !== settings.stickDisplayId) {
+    saveSettings({ stickDisplayId: result.displayId })
   }
+
+  return { x: result.x, y: result.y, width: result.width, height: result.height }
 }
 
 export function createWindow(): BrowserWindow {
-  const { x, y, width, height } = edgeGeometry()
+  const { x, y, width, height } = getStickGeometry()
 
   mainWindow = new BrowserWindow({
     icon: PATHS.icon(),
@@ -216,10 +251,28 @@ export function createWindow(): BrowserWindow {
   // Keep the panel glued to the primary display if the work area changes.
   screen.on('display-metrics-changed', () => {
     if (!mainWindow?.isVisible()) return
-    const g = edgeGeometry()
+    const g = getStickGeometry()
     mainWindow.setBounds({ ...g })
     if (detectorWindow && !detectorWindow.isDestroyed()) {
-      detectorWindow.setBounds({ x: g.x, y: g.y, width: 1, height: g.height })
+      detectorWindow.setBounds(getDetectorBounds(g, loadSettings().stickPosition))
+    }
+  })
+
+  screen.on('display-added', () => {
+    if (!mainWindow?.isVisible()) return
+    const g = getStickGeometry()
+    mainWindow.setBounds({ ...g })
+    if (detectorWindow && !detectorWindow.isDestroyed()) {
+      detectorWindow.setBounds(getDetectorBounds(g, loadSettings().stickPosition))
+    }
+  })
+
+  screen.on('display-removed', () => {
+    if (!mainWindow?.isVisible()) return
+    const g = getStickGeometry()
+    mainWindow.setBounds({ ...g })
+    if (detectorWindow && !detectorWindow.isDestroyed()) {
+      detectorWindow.setBounds(getDetectorBounds(g, loadSettings().stickPosition))
     }
   })
 
@@ -285,6 +338,15 @@ export function stopHeartbeat(): void {
   }
 }
 
+export function repositionWindow(): void {
+  if (!mainWindow || mainWindow.isDestroyed()) return
+  const g = getStickGeometry()
+  mainWindow.setBounds({ ...g })
+  if (detectorWindow && !detectorWindow.isDestroyed()) {
+    detectorWindow.setBounds(getDetectorBounds(g, loadSettings().stickPosition))
+  }
+}
+
 /** Toggle the panel between shown (always on top) and fully hidden. */
 export function setVisible(visible: boolean): void {
   if (!mainWindow) return
@@ -305,6 +367,17 @@ export function setVisible(visible: boolean): void {
  * drag-event absorber; its inline script still forwards file drags to the main
  * window via `window.edge.setInteractive(true)` should it ever receive one.
  */
+function getDetectorBounds(g: { x: number; y: number; width: number; height: number }, stickPosition: string): { x: number; y: number; width: number; height: number } {
+  if (stickPosition === 'top') {
+    const detWidth = Math.floor(g.width * 0.3)
+    return { x: g.x + Math.floor((g.width - detWidth) / 2), y: g.y, width: detWidth, height: 1 }
+  }
+  const h = g.height
+  const detHeight = Math.floor(h * 0.3)
+  const detY = g.y + Math.floor((h - detHeight) / 2)
+  return { x: g.x, y: detY, width: 1, height: detHeight }
+}
+
 function createDetectorWindow(x: number, y: number, _w: number, h: number): void {
   // Minimal HTML: the detector uses the preload bridge (window.edge) to send IPC.
   // It listens for dragenter/dragover/drop on the document and sends a signal
@@ -332,15 +405,13 @@ function createDetectorWindow(x: number, y: number, _w: number, h: number): void
 </script>
 </body></html>`
 
-  // Center vertically, 30% height so we don't block the Start menu / taskbar clicks
-  const detHeight = Math.floor(h * 0.3)
-  const detY = y + Math.floor((h - detHeight) / 2)
+  const detBounds = getDetectorBounds({ x, y, width: _w, height: h }, loadSettings().stickPosition)
 
   detectorWindow = new BrowserWindow({
-    x,
-    y: detY,
-    width: 1,
-    height: detHeight,
+    x: detBounds.x,
+    y: detBounds.y,
+    width: detBounds.width,
+    height: detBounds.height,
     show: false,
     frame: false,
     fullscreenable: false,

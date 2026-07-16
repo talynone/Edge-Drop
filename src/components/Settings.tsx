@@ -168,6 +168,31 @@ export function Settings() {
 
       <div className="setting-divider" />
 
+      {/* Stick position */}
+      <div className="setting-row vertical">
+        <div className="setting-info">
+          <div className="setting-title">Stick position</div>
+          <div className="setting-desc">Screen edge to attach the panel</div>
+        </div>
+        <div className="setting-pills">
+          {[
+            { label: 'Left', val: 'left' as const },
+            { label: 'Right', val: 'right' as const },
+            { label: 'Top', val: 'top' as const }
+          ].map((opt) => (
+            <button
+              key={opt.label}
+              className={`pill ${settings.stickPosition === opt.val ? 'active' : ''}`}
+              onClick={() => patch({ stickPosition: opt.val })}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="setting-divider" />
+
       {/* Incognito mode */}
       <div className="setting-row">
         <div className="setting-info">

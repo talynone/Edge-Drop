@@ -33,6 +33,25 @@
   border: none;
   backdrop-filter: blur(20px);
 }
+.blade-container.blade-right .blade {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 24px;
+  border-bottom-left-radius: 24px;
+}
+
+/* Top-position blade: centered at top, bottom-rounded corners */
+.blade-container.blade-top {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  y: 0 !important;
+}
+.blade-container.blade-top .blade {
+  margin: 0 auto;
+  border-radius: 0 0 24px 24px;
+}
 
 /* Reverse curves (flares) connecting blade to screen edge */
 .flare-top, .flare-bottom {
@@ -46,6 +65,12 @@
   background: linear-gradient(to right, #000000 30px, transparent 30px);
   justify-content: flex-end;
 }
+.flare-top.flare-right, .flare-bottom.flare-right {
+  left: auto;
+  right: -30px;
+  background: linear-gradient(to left, #000000 30px, transparent 30px);
+  justify-content: flex-start;
+}
 .flare-top {
   top: -30px;
 }
@@ -56,6 +81,11 @@
   width: 30px;
   height: 30px;
   display: block;
+}
+
+/* CSS transition for clip-path (Framer Motion can't interpolate calc() properly) */
+.blade-container {
+  transition: clip-path 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Parent container solid block extension to prevent screen edge blur transparency */
@@ -69,6 +99,13 @@
   background: #000000;
   pointer-events: none;
   z-index: -2;
+}
+.blade-container.blade-right::before {
+  left: auto;
+  right: -30px;
+}
+.blade-container.blade-top::before {
+  display: none;
 }
 
 

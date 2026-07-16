@@ -158,29 +158,73 @@ export function Panel() {
     setDragActive(false)
   }
 
+  const isRight = settings.stickPosition === 'right'
+  const isTop = settings.stickPosition === 'top'
+
+  let containerClass = 'blade-container'
+  if (isRight) containerClass += ' blade-right'
+  if (isTop) containerClass += ' blade-top'
+
+  const containerStyle: Record<string, unknown> = {
+    position: 'absolute',
+    zIndex: 10,
+    pointerEvents: open ? 'auto' : 'none'
+  }
+
+  let originX = 0
+  let originY = 0.5
+  if (isTop) {
+    containerStyle.top = 0
+    containerStyle.left = 0
+    containerStyle.right = 0
+    containerStyle.y = 0
+    originX = 0.5
+    originY = 0
+  } else if (isRight) {
+    containerStyle.top = topOffset
+    containerStyle.y = '-50%'
+    containerStyle.right = 0
+    originX = 1
+  } else {
+    containerStyle.top = topOffset
+    containerStyle.y = '-50%'
+    containerStyle.left = 0
+  }
+  containerStyle.originX = originX
+  containerStyle.originY = originY
+
+  const PANEL_WIDE = 270
+  const panelHalfW = PANEL_WIDE / 2
+
+  // Set clipPath via style (not animate) to avoid Framer Motion's broken
+  // calc() interpolation — CSS transitions handle it correctly.
+  let clipPath: string
+  if (isTop) {
+    clipPath = open
+      ? 'inset(calc(0% - 100px) calc(0% - 100px) calc(0% - 100px) calc(0% - 100px) round 0px 0px 24px 24px)'
+      : `inset(0px calc(50% - ${panelHalfW}px) calc(100% - ${settings.hotZoneWidth || 3}px) calc(50% - ${panelHalfW}px) round 0px 0px 24px 24px)`
+  } else if (isRight) {
+    clipPath = open
+      ? 'inset(calc(0% - 100px) 0px calc(0% - 100px) calc(0% - 100px) round 24px 0px 0px 24px)'
+      : `inset(calc(50% - ${halfTrigger}px) 0px calc(50% - ${halfTrigger}px) calc(100% - ${settings.hotZoneWidth || 3}px) round 24px 0px 0px 24px)`
+  } else {
+    clipPath = open
+      ? 'inset(calc(0% - 100px) calc(0% - 100px) calc(0% - 100px) 0px round 0px 24px 24px 0px)'
+      : `inset(calc(50% - ${halfTrigger}px) calc(100% - ${settings.hotZoneWidth || 3}px) calc(50% - ${halfTrigger}px) 0px round 0px 24px 24px 0px)`
+  }
+  containerStyle.clipPath = clipPath
+
   return (
     <div className="root">
       <motion.div
-        className="blade-container"
+        className={containerClass}
         initial={false}
         onDragEnter={onDragEnter}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        style={{
-          top: topOffset,
-          y: '-50%',
-          position: 'absolute',
-          left: 0,
-          zIndex: 10,
-          pointerEvents: open ? 'auto' : 'none',
-          originX: 0,
-          originY: 0.5
-        }}
+        style={containerStyle}
         animate={{
-          clipPath: open
-            ? 'inset(calc(0% - 100px) calc(0% - 100px) calc(0% - 100px) 0px round 0px 24px 24px 0px)'
-            : `inset(calc(50% - ${halfTrigger}px) calc(100% - ${settings.hotZoneWidth || 3}px) calc(50% - ${halfTrigger}px) 0px round 0px 24px 24px 0px)`,
           scale: open ? [0.92, 1.05, 0.98, 1] : 1,
           filter: open ? 'blur(0px)' : 'blur(16px)'
         }}
@@ -189,27 +233,41 @@ export function Panel() {
             duration: 0.55,
             ease: [0.22, 1, 0.36, 1]
           },
-          clipPath: {
-            type: 'spring',
-            bounce: 0.5,
-            duration: 0.6
-          },
           filter: {
             duration: open ? 0.8 : 0.45,
             ease: open ? [0.16, 1, 0.3, 1] : [0.4, 0, 0.2, 1]
           }
         }}
       >
-        <div className="flare-top">
-          <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 0 0 L 0 30 L 30 30 A 30 30 0 0 1 0 0 Z" fill="#000000" />
-          </svg>
-        </div>
-        <div className="flare-bottom">
-          <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 0 30 L 0 0 L 30 0 A 30 30 0 0 0 0 30 Z" fill="#000000" />
-          </svg>
-        </div>
+        {!isTop ? (
+          isRight ? (
+            <>
+              <div className="flare-top flare-right">
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M 30 0 L 30 30 L 0 30 A 30 30 0 0 0 30 0 Z" fill="#000000" />
+                </svg>
+              </div>
+              <div className="flare-bottom flare-right">
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M 30 30 L 30 0 L 0 0 A 30 30 0 0 1 30 30 Z" fill="#000000" />
+                </svg>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flare-top">
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M 0 0 L 0 30 L 30 30 A 30 30 0 0 1 0 0 Z" fill="#000000" />
+                </svg>
+              </div>
+              <div className="flare-bottom">
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M 0 30 L 0 0 L 30 0 A 30 30 0 0 0 0 30 Z" fill="#000000" />
+                </svg>
+              </div>
+            </>
+          )
+        ) : null}
         <div
           ref={bladeRef}
           className="blade"
@@ -222,9 +280,9 @@ export function Panel() {
             {settingsOpen ? (
               <motion.div
                 key="settings"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, [isTop ? 'y' : 'x']: isTop ? -10 : (isRight ? -10 : 10) }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                exit={{ opacity: 0, [isTop ? 'y' : 'x']: isTop ? 10 : (isRight ? 10 : -10) }}
                 transition={{ duration: 0.15 }}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}
               >
@@ -235,9 +293,9 @@ export function Panel() {
             ) : (
               <motion.div
                 key="list"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, [isTop ? 'y' : 'x']: isTop ? 10 : (isRight ? 10 : -10) }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                exit={{ opacity: 0, [isTop ? 'y' : 'x']: isTop ? -10 : (isRight ? -10 : 10) }}
                 transition={{ duration: 0.15 }}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}
               >
@@ -265,7 +323,7 @@ export function Panel() {
             )}
           </AnimatePresence>
           <DropOverlay />
-          <SplitDropZone />
+          <SplitDropZone isRight={isRight} isTop={isTop} />
         </div>
       </motion.div>
     </div>
@@ -353,7 +411,7 @@ function DropOverlay() {
   )
 }
 
-function SplitDropZone() {
+function SplitDropZone({ isRight = false, isTop = false }: { isRight?: boolean; isTop?: boolean }) {
   const internalDragReq = useStore((s) => s.internalDragReq)
   const isSubitemDragging = !!(
     internalDragReq &&
@@ -379,11 +437,11 @@ function SplitDropZone() {
           onDragOver={(e) => e.preventDefault()}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
-          initial={{ opacity: 0, x: -15 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -15 }}
+          initial={{ opacity: 0, [isTop ? 'y' : 'x']: isTop ? -15 : (isRight ? 15 : -15) }}
+          animate={{ opacity: 1, x: 0, y: 0 }}
+          exit={{ opacity: 0, [isTop ? 'y' : 'x']: isTop ? -15 : (isRight ? 15 : -15) }}
           transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-          style={{ y: '-50%' }}
+          style={isTop ? {} : { y: '-50%' }}
         >
           <div className="glow-line" />
         </motion.div>

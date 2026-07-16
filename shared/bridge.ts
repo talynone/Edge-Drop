@@ -41,7 +41,15 @@ export interface EdgeApi {
   onOpenSettings: (cb: () => void) => () => void
   onDragEnd: (cb: () => void) => () => void
   onInternalDrop: (cb: (pos: { x: number; y: number }) => void) => () => void
-  onCursorEdge: (cb: (data: { x: number; y: number; inEdge: boolean; inZone: boolean }) => void) => () => void
+  onCursorEdge: (cb: (data: {
+    x: number
+    y: number
+    inEdge: boolean
+    inZone: boolean
+    stickPosition: import('./types').StickPosition
+    displayWidth: number
+    displayHeight: number
+  }) => void) => () => void
   onToast: (cb: (toast: { id: string; message: string; tone: 'info' | 'error' }) => void) => () => void
   onTutorialStep: (cb: (step: number) => void) => () => void
 }

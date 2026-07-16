@@ -12,7 +12,7 @@ import { psHost } from './powershell'
 import { type InvokeMap, type InvokeChannel, type SendMap, type SendChannel } from '../../shared/ipc'
 import { getStore, loadSettings, saveSettings, pushState, addFiles, getWatcher } from './state'
 import { getMainWindow } from './window'
-import { setInteractive, setHeartbeatPaused, setHotZoneWidth } from './window'
+import { setInteractive, setHeartbeatPaused, setHotZoneWidth, repositionWindow } from './window'
 import { getOnboardingWindow } from './onboardingWindow'
 import { startDragOut, resolveDragData } from './drag'
 import { clipboardSignature } from '../clipboard/formats'
@@ -436,6 +436,9 @@ export function registerIpc(): void {
     }
     if (patch.hotZoneWidth !== undefined) {
       setHotZoneWidth(patch.hotZoneWidth)
+    }
+    if (patch.stickPosition !== undefined) {
+      repositionWindow()
     }
     pushState.settings(next)
     return next

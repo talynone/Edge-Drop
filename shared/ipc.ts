@@ -97,7 +97,15 @@ export interface EventMap {
    * Windows transparent windows).
    * payload: { x, y, inEdge, inZone }
    */
-  'window:cursor-edge': [data: { x: number; y: number; inEdge: boolean; inZone: boolean }]
+  'window:cursor-edge': [data: {
+    x: number
+    y: number
+    inEdge: boolean
+    inZone: boolean
+    stickPosition: import('./types').StickPosition
+    displayWidth: number
+    displayHeight: number
+  }]
 }
 
 /* ------------------------------------------------------------------ */

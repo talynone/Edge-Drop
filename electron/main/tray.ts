@@ -10,7 +10,8 @@ import { Menu, Tray, app, nativeImage, Notification } from 'electron'
 import { existsSync } from 'node:fs'
 import { PATHS } from '../store/paths'
 import { loadSettings, saveSettings } from '../store/settings'
-import { getMainWindow, setVisible } from './window'
+import { getMainWindow, setVisible, repositionWindow } from './window'
+import type { StickPosition } from '../../shared/types'
 import { pushState } from './state'
 
 let tray: Tray | null = null
@@ -56,6 +57,19 @@ export function createTray(): Tray {
     } catch { /* ignore */ }
   }
 
+  function buildStickSubmenu(current: StickPosition): Electron.MenuItemConstructorOptions[] {
+    return (['left', 'right', 'top'] as StickPosition[]).map((pos) => ({
+      label: pos.charAt(0).toUpperCase() + pos.slice(1),
+      type: 'radio' as const,
+      checked: current === pos,
+      click: () => {
+        const next = saveSettings({ stickPosition: pos })
+        pushState.settings(next)
+        repositionWindow()
+      }
+    }))
+  }
+
   const rebuild = () => {
     const settings = loadSettings()
     const menu = Menu.buildFromTemplate([
@@ -87,6 +101,11 @@ export function createTray(): Tray {
           pushState.settings(next)
           applyIncognito(next.incognito)
         }
+      },
+      { type: 'separator' },
+      {
+        label: 'Stick to',
+        submenu: buildStickSubmenu(settings.stickPosition)
       },
       { type: 'separator' },
       {

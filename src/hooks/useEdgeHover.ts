@@ -150,10 +150,18 @@ export function useEdgeHover(): void {
     // expand). So we treat `panel:leave` as a *hint* and only actually close
     // if the last known pointer position is genuinely outside the blade.
     const isInsideBlade = () => {
-      const { midY, panelHalfH } = zone.current
       const { x, y } = lastClient.current
-      if (x < 0) return true // unknown — be conservative, don't close
-      return x <= PANEL_WIDE && y >= midY - panelHalfH && y <= midY + panelHalfH
+      if (x < 0 || y < 0) return true // unknown — be conservative, don't close
+      const s = settingsRef.current
+      if (s.stickPosition === 'top') {
+        const bladeH = (s.panelHeight || 0.5) * window.innerHeight
+        return y <= bladeH && x >= (window.innerWidth - PANEL_WIDE) / 2 && x <= (window.innerWidth + PANEL_WIDE) / 2
+      }
+      if (s.stickPosition === 'right') {
+        return x >= window.innerWidth - PANEL_WIDE
+      }
+      // left
+      return x <= PANEL_WIDE
     }
 
     const onPanelLeave = () => {
@@ -174,59 +182,140 @@ export function useEdgeHover(): void {
     // here with the renderer's own settings so everything stays in sync.
     const unsubCursorEdge = window.edge.onCursorEdge((data) => {
       lastClient.current = { x: data.x, y: data.y }
+      const { stickPosition, displayWidth } = data
       const { top, bottom, midY, panelHalfH } = zone.current
-      const inEdge = data.x <= TRIGGER_PX
-      const inZone = data.y >= top && data.y <= bottom
+      const centerX = displayWidth / 2
+      const panelHalfW = PANEL_WIDE / 2
 
-      // Edge trigger: only start dwell to OPEN when panel is closed.
-      // When panel is already open, cursor at x=0 is treated like any other
-      // inside-blade position (falls through to insideX check below).
-      if (inEdge && inZone && !openRef.current) {
-        cancelClose()
-        if (dwellTimer === undefined) {
-          dwellTimer = window.setTimeout(() => {
+      switch (stickPosition) {
+        case 'right': {
+          const distFromRight = displayWidth - data.x
+          const inEdge = distFromRight <= TRIGGER_PX
+          const inZone = data.y >= top && data.y <= bottom
+
+          if (inEdge && inZone && !openRef.current) {
+            cancelClose()
+            if (dwellTimer === undefined) {
+              dwellTimer = window.setTimeout(() => {
+                dwellTimer = undefined
+                openPanel()
+              }, DWELL_MS)
+            }
+            return
+          }
+
+          if (dwellTimer !== undefined) {
+            window.clearTimeout(dwellTimer)
             dwellTimer = undefined
-            openPanel()
-          }, DWELL_MS)
+          }
+
+          if (!openRef.current) return
+
+          const now = Date.now()
+          if (now - lastSetInteractiveRef.current > 2000) {
+            lastSetInteractiveRef.current = now
+            edge.setInteractive(true)
+          }
+
+          const insideY = data.y >= midY - panelHalfH && data.y <= midY + panelHalfH
+
+          if (distFromRight <= KEEP_OPEN_PX && insideY) {
+            cancelClose()
+            return
+          }
+
+          if (distFromRight > START_CLOSE_PX || !insideY) {
+            scheduleClose()
+          }
+          break
         }
-        return
+
+        case 'top': {
+          const inEdge = data.y <= TRIGGER_PX
+          const inZone = data.x >= centerX - panelHalfW && data.x <= centerX + panelHalfW
+
+          if (inEdge && inZone && !openRef.current) {
+            cancelClose()
+            if (dwellTimer === undefined) {
+              dwellTimer = window.setTimeout(() => {
+                dwellTimer = undefined
+                openPanel()
+              }, DWELL_MS)
+            }
+            return
+          }
+
+          if (dwellTimer !== undefined) {
+            window.clearTimeout(dwellTimer)
+            dwellTimer = undefined
+          }
+
+          if (!openRef.current) return
+
+          const now = Date.now()
+          if (now - lastSetInteractiveRef.current > 2000) {
+            lastSetInteractiveRef.current = now
+            edge.setInteractive(true)
+          }
+
+          const insideX = data.x >= centerX - panelHalfW && data.x <= centerX + panelHalfW
+          const bladeH = (settingsRef.current.panelHeight || 0.5) * data.displayHeight
+          const keepOpenY = bladeH - 15
+          const startCloseY = bladeH + 20
+
+          if (data.y <= keepOpenY && insideX) {
+            cancelClose()
+            return
+          }
+
+          if (data.y > startCloseY || !insideX) {
+            scheduleClose()
+          }
+          break
+        }
+
+        // left
+        default: {
+          const inEdge = data.x <= TRIGGER_PX
+          const inZone = data.y >= top && data.y <= bottom
+
+          if (inEdge && inZone && !openRef.current) {
+            cancelClose()
+            if (dwellTimer === undefined) {
+              dwellTimer = window.setTimeout(() => {
+                dwellTimer = undefined
+                openPanel()
+              }, DWELL_MS)
+            }
+            return
+          }
+
+          if (dwellTimer !== undefined) {
+            window.clearTimeout(dwellTimer)
+            dwellTimer = undefined
+          }
+
+          if (!openRef.current) return
+
+          const now = Date.now()
+          if (now - lastSetInteractiveRef.current > 2000) {
+            lastSetInteractiveRef.current = now
+            edge.setInteractive(true)
+          }
+
+          const insideY = data.y >= midY - panelHalfH && data.y <= midY + panelHalfH
+
+          if (data.x <= KEEP_OPEN_PX && insideY) {
+            cancelClose()
+            return
+          }
+
+          if (data.x > START_CLOSE_PX || !insideY) {
+            scheduleClose()
+          }
+          break
+        }
       }
-
-      if (dwellTimer !== undefined) {
-        window.clearTimeout(dwellTimer)
-        dwellTimer = undefined
-      }
-
-      if (!openRef.current) return
-
-      // Self-healing safety: if panel is open, enforce interactivity so it can never be stuck click-through!
-      // Throttled to fire at most once every 2 seconds to prevent flooding the IPC queue.
-      const now = Date.now()
-      if (now - lastSetInteractiveRef.current > 2000) {
-        lastSetInteractiveRef.current = now
-        edge.setInteractive(true)
-      }
-
-      // Hysteresis-based close detection.
-      // Using two separate thresholds prevents the oscillation that occurs when
-      // the cursor hovers right at the blade edge (x ≈ 280px): a single threshold
-      // causes rapid cancel/schedule cycles every 16ms that prevent the grace
-      // timer from ever counting down.
-      //
-      //  x ≤ KEEP_OPEN_PX (250): cursor clearly inside blade → cancel close
-      //  x > START_CLOSE_PX (340): cursor clearly outside window → schedule close
-      //  250 < x ≤ 340 (dead band): neither action — let existing timer run
-      const insideY = data.y >= midY - panelHalfH && data.y <= midY + panelHalfH
-
-      if (data.x <= KEEP_OPEN_PX && insideY) {
-        cancelClose()
-        return
-      }
-
-      if (data.x > START_CLOSE_PX || !insideY) {
-        scheduleClose()
-      }
-      // else: dead band — do nothing, let existing timer expire naturally
     })
 
     // ── keyboard ───────────────────────────────────────────────────────────
