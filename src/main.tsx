@@ -2,7 +2,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import { Onboarding } from './Onboarding'
 
 // Stylesheet order matters: tokens first, then globals, then components.
 import './styles/tokens.css'
@@ -14,10 +13,22 @@ import './styles/settings.css'
 const container = document.getElementById('root')
 if (!container) throw new Error('#root element not found')
 
-const isOnboarding = window.location.href.includes('onboarding')
+const root = createRoot(container)
 
-createRoot(container).render(
-  <StrictMode>
-    {isOnboarding ? <Onboarding /> : <App />}
-  </StrictMode>
-)
+if (window.location.hash === '#onboarding') {
+  // The tutorial is only opened once. Keep its component (and its video UI)
+  // out of the always-running panel renderer.
+  void import('./Onboarding').then(({ Onboarding }) => {
+    root.render(
+      <StrictMode>
+        <Onboarding />
+      </StrictMode>
+    )
+  })
+} else {
+  root.render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  )
+}

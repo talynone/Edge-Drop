@@ -35,6 +35,8 @@ export const PANEL_WIDTH = 384
 export const COLLAPSED_WIDTH = 0
 
 let mainWindow: BrowserWindow | null = null
+// Kept only by the unused legacy helper at the bottom of this module. The
+// detector window is deliberately no longer created at runtime.
 let detectorWindow: BrowserWindow | null = null
 let interactive = false
 
@@ -116,9 +118,6 @@ export function setHeartbeatPaused(paused: boolean): void {
     // to the correct level without waiting up to 500 ms for the next tick.
     if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
       mainWindow.setAlwaysOnTop(true, 'screen-saver')
-    }
-    if (detectorWindow && !detectorWindow.isDestroyed() && detectorWindow.isVisible()) {
-      detectorWindow.setAlwaysOnTop(true, 'screen-saver')
     }
   }
 }
@@ -213,7 +212,7 @@ function getStickGeometry(): { x: number; y: number; width: number; height: numb
 }
 
 export function createWindow(): BrowserWindow {
-  const { x, y, width, height } = getStickGeometry()
+  const { x, y, height } = getStickGeometry()
 
   mainWindow = new BrowserWindow({
     icon: PATHS.icon(),
@@ -288,9 +287,6 @@ export function createWindow(): BrowserWindow {
     }
   })
 
-  // Create the detector window for OS drag-in awareness.
-  createDetectorWindow(x, y, width, height)
-
   // Periodic heartbeat: Windows fullscreen apps (Chrome YouTube, games) push
   // floating windows behind them. Re-asserting 'screen-saver' level every 500ms
   // ensures the panel instantly re-appears when the user exits fullscreen.
@@ -299,9 +295,6 @@ export function createWindow(): BrowserWindow {
     if (runtime.quitting || heartbeatPaused || interactive) return
     if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
       mainWindow.setAlwaysOnTop(true, 'screen-saver')
-    }
-    if (detectorWindow && !detectorWindow.isDestroyed() && detectorWindow.isVisible()) {
-      detectorWindow.setAlwaysOnTop(true, 'screen-saver')
     }
   }, 500)
 
@@ -319,9 +312,6 @@ export function repositionWindow(): void {
   if (!mainWindow || mainWindow.isDestroyed()) return
   const g = getStickGeometry()
   mainWindow.setBounds({ ...g })
-  if (detectorWindow && !detectorWindow.isDestroyed()) {
-    detectorWindow.setBounds(getDetectorBounds(g, loadSettings().stickPosition))
-  }
 }
 
 /** Toggle the panel between shown (always on top) and fully hidden. */
@@ -355,7 +345,7 @@ function getDetectorBounds(g: { x: number; y: number; width: number; height: num
   return { x: g.x, y: detY, width: 1, height: detHeight }
 }
 
-function createDetectorWindow(x: number, y: number, _w: number, h: number): void {
+export function createDetectorWindow(x: number, y: number, _w: number, h: number): void {
   // Minimal HTML: the detector uses the preload bridge (window.edge) to send IPC.
   // It listens for dragenter/dragover/drop on the document and sends a signal
   // when Files are detected.

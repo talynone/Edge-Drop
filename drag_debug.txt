@@ -3717,3 +3717,9 @@
 [2026-07-17T14:10:23.951Z] createFileStackDragIcon returning cached for stack|solid-black|image|1
 [2026-07-17T14:10:23.952Z] dragIcon result: isEmpty=false, size={"width":96,"height":96}
 [2026-07-17T14:10:23.952Z] calling sender.startDrag with item.file=C:\Users\yadav\AppData\Roaming\edge-drop\temp\mrp0jimh-m2zojuay.png, item.files=undefined
+[2026-07-17T17:02:55.117Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-17T17:02:55.499Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-17T17:02:55.500Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-17T17:02:55.647Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}
+[2026-07-17T17:02:55.648Z] createFileStackDragIcon calling Resvg for count=1
+[2026-07-17T17:02:55.787Z] createFileStackDragIcon resvg result: isEmpty=false, size={"width":96,"height":96}

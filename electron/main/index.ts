@@ -21,6 +21,12 @@ import { join } from 'node:path'
 import { existsSync, createReadStream } from 'node:fs'
 import { createHash } from 'node:crypto'
 
+// Edge-Drop renders a small, mostly static transparent panel. Chromium's GPU
+// process costs substantially more memory than it saves here, so use software
+// compositing and retain the same visual/UI behavior without that process.
+// Electron requires this before the ready event.
+app.disableHardwareAcceleration()
+
 // Restrict the renderer to a single webContents and forbid remote module usage.
 app.enableSandbox()
 

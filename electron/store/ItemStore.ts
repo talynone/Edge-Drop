@@ -46,7 +46,8 @@ interface Index {
 export class ItemStore {
   private items: ClipboardItem[] = []
   private sigToId = new Map<string, string>()
-  private dataUrlCache = new Map<string, string>()
+  /** Small, bounded thumbnails for renderer DTOs. Original image bytes stay on disk. */
+  private previewCache = new Map<string, string>()
 
   /** Load persisted state from disk. Called once at startup. */
   load(): void {
@@ -365,17 +366,30 @@ export class ItemStore {
 
   /* ----------------------------- image files ----------------------------- */
 
-  /** Read image bytes from disk as a data URL for the renderer. */
+  /**
+   * Build a display-sized image preview. Sending originals as base64 data URLs
+   * duplicates every image in the main process, IPC payload and renderer heap.
+   */
   imageToDataUrl(imageId: string, ext?: string): string | null {
     const cacheKey = `${imageId}.${ext || ''}`
-    if (this.dataUrlCache.has(cacheKey)) {
-      return this.dataUrlCache.get(cacheKey)!
+    const cached = this.previewCache.get(cacheKey)
+    if (cached) {
+      this.previewCache.delete(cacheKey)
+      this.previewCache.set(cacheKey, cached)
+      return cached
     }
     try {
-      const buf = readFileSync(this.imagePath(imageId, ext))
-      const mime = detectImageMime(buf)
-      const url = `data:${mime};base64,` + buf.toString('base64')
-      this.dataUrlCache.set(cacheKey, url)
+      const img = nativeImage.createFromPath(this.imagePath(imageId, ext))
+      if (img.isEmpty()) return null
+      const size = img.getSize()
+      const thumb = size.width > THUMB_SIZE || size.height > THUMB_SIZE
+        ? img.resize({ width: THUMB_SIZE, quality: 'good' })
+        : img
+      const url = thumb.toDataURL({ scaleFactor: 1 })
+      if (this.previewCache.size >= PREVIEW_CACHE_MAX) {
+        this.previewCache.delete(this.previewCache.keys().next().value!)
+      }
+      this.previewCache.set(cacheKey, url)
       return url
     } catch {
       return null
@@ -416,8 +430,8 @@ export class ItemStore {
   }
 
   private removeImageFile(imageId: string): void {
-    for (const key of this.dataUrlCache.keys()) {
-      if (key.startsWith(imageId)) this.dataUrlCache.delete(key)
+    for (const key of this.previewCache.keys()) {
+      if (key.startsWith(imageId)) this.previewCache.delete(key)
     }
     const dir = PATHS.imagesDir()
     if (!existsSync(dir)) return
@@ -483,9 +497,6 @@ export class ItemStore {
   stageImageBytes(imageId: string, png: Buffer, ext = 'png'): void {
     try {
       writeFileSync(this.imagePath(imageId, ext), png)
-      const mime = detectImageMime(png)
-      const url = `data:${mime};base64,` + png.toString('base64')
-      this.dataUrlCache.set(`${imageId}.${ext}`, url)
     } catch {
       /* ignore */
     }
@@ -529,6 +540,8 @@ function buildFileEntry(p: string): FileEntry {
  * the main thread from blocking when the user copies large images.
  */
 const THUMB_SIZE = 240 // px — enough for the card UI, tiny IPC payload
+
+const PREVIEW_CACHE_MAX = 100
 
 function fileToDataUrl(p: string): string {
   if (fileDataUrlCache.has(p)) return fileDataUrlCache.get(p)!
