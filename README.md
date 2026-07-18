@@ -88,9 +88,10 @@ npm run dev          # launches Electron + Vite HMR
 npm run typecheck    # runs tsc --noEmit against both node and web configs
 ```
 
-### Build a Windows installer
+### Build Windows installers
 ```bash
-npm run package      # outputs an NSIS .exe to /dist
+npm run build:github # outputs an NSIS .exe for GitHub releases
+npm run build:store  # outputs an MSIX .appx for Microsoft Store submission
 ```
 
 > [!NOTE]
@@ -255,8 +256,9 @@ sequenceDiagram
 **Zero-click edge hover**
 - Frameless, transparent, always-on-top `BrowserWindow` anchored at `x=0`
 - 100% click-through when collapsed — desktop stays fully usable
-- 16ms Main-process cursor poll (bypasses broken Windows transparent-window `pointermove` forwarding)
 - Configurable hot-zone height (25% / 40% / 60% of screen) and blade height (40% – 100%)
+- **Multi-monitor support:** Pick exactly which display the panel sticks to, with options for Left or Right screen edges.
+- **Ultra-lightweight:** Optimized memory footprint (~60% reduced RAM) using custom `edgelocal://` streaming protocols and compressed WebM assets.
 
 **Multi-format clipboard engine**
 - Captures plain text, URLs, rich HTML, raw images, and multi-file selections
@@ -352,7 +354,7 @@ Edge-Drop is in **public beta**. The following are planned, in rough priority or
 
 - [ ] **AI semantic self-organization** — embed text/URL/HTML items, auto-cluster into named groups, replace manual pinning
 - [ ] **AI summarization** — condense multi-file bundles and long HTML copies into one-line summaries + tags
-- [ ] **Multi-monitor support** — anchor to any display edge, not just primary
+- [x] **Multi-monitor support** — anchor to any display edge, not just primary
 - [ ] **Linux port** — replace Win32-specific paths with cross-platform equivalents
 - [ ] **Plugin SDK** — let users write custom format readers and drag-out targets
 - [ ] **Cloud sync (opt-in, E2E encrypted)** — sync pinned items across machines
@@ -376,7 +378,8 @@ Edge-Drop is Apache-2.0 licensed and open to contributions. As a solo-maintained
 npm install
 npm run dev          # Electron + Vite HMR
 npm run typecheck    # tsc --noEmit (node + web configs)
-npm run package      # build Windows NSIS installer to /dist
+npm run build:github # build Windows NSIS installer for GitHub
+npm run build:store  # build Windows AppX package for Microsoft Store
 ```
 
 ---
