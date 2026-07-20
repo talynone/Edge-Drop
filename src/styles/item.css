@@ -245,6 +245,73 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Preview expand / contract button states                             */
+/* ------------------------------------------------------------------ */
+
+/* Card is actively being previewed — dim body so flyout takes focus */
+.item-main.previewing .body {
+  opacity: 0.45;
+  filter: blur(2px);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* In preview mode: center the pill horizontally over the card and enlarge everything */
+.item-main.previewing .actions {
+  right: 50%;
+  transform: translateY(-50%) translateX(50%);
+  padding: 6px;
+  gap: 6px;
+}
+
+/* All buttons in the pill get bigger when previewing */
+.item-main.previewing .act {
+  width: 38px;
+  height: 38px;
+}
+
+/* Icons inside also scale up to match the larger buttons */
+.item-main.previewing .act svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hide the delete button while preview is active — prevents accidental deletion
+   when the pill repositions and the cursor lands on the trash icon.
+   User can close preview first if they want to delete. */
+.item-main.previewing .act.danger {
+  display: none;
+}
+
+/* Brief pointer-events freeze on the pill right after preview opens,
+   so a rapid second click on the repositioned pill doesn't misfire. */
+.item-main.previewing .actions {
+  animation: preview-pill-appear 0.35s ease forwards;
+}
+
+@keyframes preview-pill-appear {
+  0%, 80% { pointer-events: none; }
+  100%     { pointer-events: auto; }
+}
+
+/* Contract (close preview) button — accented with a pulsing glow ring */
+.act.preview-contract {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22);
+  animation: preview-pulse 2s ease-in-out infinite;
+}
+.act.preview-contract:hover {
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+  animation: none;
+}
+
+@keyframes preview-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22); }
+  50%       { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1), 0 0 14px rgba(255, 255, 255, 0.08); }
+}
+
+/* ------------------------------------------------------------------ */
 /* Bundle-specific styles                                              */
 /* ------------------------------------------------------------------ */
 

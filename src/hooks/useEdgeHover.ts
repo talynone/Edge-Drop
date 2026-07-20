@@ -42,6 +42,30 @@ const PREVIEW_WIDE = 740             // Extended width when preview flyout is ac
 export const PANEL_LEAVE_EVENT = 'panel:leave'
 export const PANEL_ENTER_EVENT = 'panel:enter'
 
+// How long to keep the panel alive after the user explicitly closes the preview
+// via the X button. This prevents the jarring simultaneous collapse of both
+// the preview and the clipboard.
+const PREVIEW_CLOSE_STAY_MS = 2500
+
+// Module-level flag set by the X button click. useEdgeHover reads this to
+// extend the close grace period without needing React state or store updates.
+let _previewClosedByUser = false
+let _previewClosedTimer: number | undefined
+
+/**
+ * Call this from the preview flyout's X button to signal that the user
+ * deliberately closed the preview — the clipboard should stay open for a
+ * while so they can keep browsing.
+ */
+export function notifyPreviewClosedByUser(): void {
+  _previewClosedByUser = true
+  if (_previewClosedTimer !== undefined) window.clearTimeout(_previewClosedTimer)
+  _previewClosedTimer = window.setTimeout(() => {
+    _previewClosedByUser = false
+    _previewClosedTimer = undefined
+  }, PREVIEW_CLOSE_STAY_MS)
+}
+
 export function useEdgeHover(): void {
   const open = useStore((s) => s.open)
   const setOpen = useStore((s) => s.setOpen)
@@ -141,7 +165,10 @@ export function useEdgeHover(): void {
     const scheduleClose = (delay = GRACE_MS) => {
       if (dragActiveRef.current && !internalDragRef.current) return
       if (graceTimer !== undefined) return // already closing
-      graceTimer = window.setTimeout(closePanel, delay)
+      // If the user just closed the preview via X, give them extra time before
+      // the clipboard collapses so they can keep using it.
+      const effectiveDelay = _previewClosedByUser ? PREVIEW_CLOSE_STAY_MS : delay
+      graceTimer = window.setTimeout(closePanel, effectiveDelay)
     }
 
     const cancelClose = () => {
@@ -152,6 +179,16 @@ export function useEdgeHover(): void {
       if (interactiveTimer !== undefined) {
         window.clearTimeout(interactiveTimer)
         interactiveTimer = undefined
+      }
+      // User re-entered the clipboard — clear the grace period flag so the
+      // next time they leave, the panel retracts at normal speed instead of
+      // waiting the full 2.5s safety net.
+      if (_previewClosedByUser) {
+        _previewClosedByUser = false
+        if (_previewClosedTimer !== undefined) {
+          window.clearTimeout(_previewClosedTimer)
+          _previewClosedTimer = undefined
+        }
       }
     }
 

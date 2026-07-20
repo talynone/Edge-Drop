@@ -2,14 +2,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '../store/appStore'
 import { formatBytes } from '../lib/format'
 import { getFileKind } from '../lib/fileType'
-import { FileKindIcon, CloseIcon } from './icons'
+import { FileKindIcon } from './icons'
 import { createPortal } from 'react-dom'
 
 export function PreviewFlyout({ isRight }: { isRight: boolean }) {
   const previewItemId = useStore((s) => s.previewItemId)
   const items = useStore((s) => s.items)
   const previewItemRect = useStore((s) => s.previewItemRect)
-  const setPreviewItemId = useStore((s) => s.setPreviewItemId)
   const settings = useStore((s) => s.settings)
   
   const item = previewItemId ? items.find((i) => i.id === previewItemId) : null
@@ -72,21 +71,8 @@ export function PreviewFlyout({ isRight }: { isRight: boolean }) {
               transformOrigin: `${isRight ? '100%' : '0%'} ${originY}`,
             }}
           >
-          {/* Header */}
-          <div style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>Preview</h3>
-            <button
-              className="act"
-              title="Close Preview"
-              onClick={() => setPreviewItemId(null)}
-              style={{ background: 'rgba(255, 255, 255, 0.08)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '50%' }}
-            >
-              <CloseIcon width={16} height={16} />
-            </button>
-          </div>
-          
-          {/* Content */}
-          <div style={{ padding: '16px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
+          {/* Content — even bezels, no header chrome */}
+          <div style={{ padding: '20px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
             <PreviewContent item={item} />
           </div>
         </motion.div>

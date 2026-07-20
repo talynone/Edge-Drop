@@ -23,7 +23,7 @@ import { useStore } from '../store/appStore'
 import { useDragOut } from '../hooks/useDragOut'
 import { basename, formatBytes, previewText, relativeTime } from '../lib/format'
 import { getFileKind } from '../lib/fileType'
-import { CopyIcon, FileKindIcon, ImageIcon, LinkIcon, PinIcon, PinFillIcon, TrashIcon, MinusIcon, ChevronUpIcon, EyeIcon, EyeOffIcon } from './icons'
+import { CopyIcon, FileKindIcon, ImageIcon, LinkIcon, PinIcon, PinFillIcon, TrashIcon, MinusIcon, ChevronUpIcon, ExpandIcon, ContractIcon } from './icons'
 import '../styles/item.css'
 
 /**
@@ -129,7 +129,7 @@ function ClipboardItemBase({ item }: Props) {
       className={`item${item.pinned ? ' pinned' : ''}${isBundle ? ' bundle' : ''}`}
     >
       <div
-        className={`item-main${isPreviewing ? ' force-actions' : ''}`}
+        className={`item-main${isPreviewing ? ' force-actions previewing' : ''}`}
         data-id={item.id}
         draggable={item.data.kind !== 'text' && (!isBundle || !expanded)}
         onDragStart={(e) => handleDragStart(e, { id: item.id })}
@@ -210,8 +210,8 @@ function ClipboardItemBase({ item }: Props) {
             <CopyIcon />
           </button>
           <button
-            className="act"
-            title={isPreviewing ? "Close Preview" : "Preview"}
+            className={`act${isPreviewing ? ' preview-contract active' : ' preview-expand'}`}
+            title={isPreviewing ? 'Close Preview' : 'Expand Preview'}
             onClick={(e) => {
               e.stopPropagation()
               e.currentTarget.blur()
@@ -220,7 +220,7 @@ function ClipboardItemBase({ item }: Props) {
               useStore.getState().setPreviewItemId(isPreviewing ? null : item.id, rectData)
             }}
           >
-            {isPreviewing ? <EyeIcon /> : <EyeOffIcon />}
+            {isPreviewing ? <ContractIcon /> : <ExpandIcon />}
           </button>
           <button
             className="act danger"
