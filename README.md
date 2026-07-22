@@ -257,7 +257,7 @@ sequenceDiagram
 - Frameless, transparent, always-on-top `BrowserWindow` anchored at `x=0`
 - 100% click-through when collapsed — desktop stays fully usable
 - Configurable hot-zone height (25% / 40% / 60% of screen) and blade height (40% – 100%)
-- **Multi-monitor support:** Pick exactly which display the panel sticks to, with options for Left or Right screen edges.
+- **Multi-monitor support:** Pick exactly which display the panel sticks to, with options for Left or Right screen edges. Features a single source of truth multi-display engine (`getDisplayListOptions()`) with real-time System Tray menu synchronization, automatic OS topology recovery on monitor disconnect (`display-removed`), and brief 1.5s visual confirmation pop-ups (`popUpAndRetract`).
 - **Ultra-lightweight:** Optimized memory footprint (~60% reduced RAM) using custom `edgelocal://` streaming protocols and compressed WebM assets.
 
 **Multi-format clipboard engine**
@@ -280,7 +280,10 @@ sequenceDiagram
 - Type-safe merge rules: images only merge with images, files with files (text never groups)
 
 **UI / UX**
-- **Dynamic Preview Flyout**: Responsive 100% full-width (`1fr`) layout for single files, 2-column grid for multi-file collections
+- **Dynamic Preview Flyout**: Responsive 100% full-width (`1fr`) layout for single files, 2-column grid for multi-file collections, with calibrated `ResizeObserver` hover boundary tracking (`insideY`)
+- **Universal Click-to-Paste**: Click any text snippet, image thumbnail, or file tile inside Preview Flyout to instantly paste into active desktop applications with shared double-click debounce protection (`tryPaste.ts`)
+- **Animation Performance Controls**: Fine-grained settings under **Animations** for springy overshoot scale pop (`bounceAnimation`) and background filter blurring (`blurAnimation`)
+- **Staggered Panel & Preview Exit Timing**: Closing while a preview flyout is open dismisses the preview flyout first (`240ms` delay) before collapsing the main shelf to prevent layout collisions
 - **Unified Image Rendering**: Copied image files (`.png`, `.jpeg`, `.gif`, `.webp`) render as visual image cards with thumbnails on the shelf and display full visual image previews in flyouts
 - **High-Contrast Overlays**: Solid dark `rgba(0, 0, 0, 0.85)` copy button overlays with glassmorphic backdrop blur over images
 - Frosted-glass macOS aesthetic — deep black, `backdrop-filter: blur(20px)`, hairline borders
