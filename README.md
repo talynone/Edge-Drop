@@ -65,6 +65,10 @@ It is built for the developer and creative workflow where you constantly juggle 
       <video src="https://github.com/user-attachments/assets/cee7d5f7-658b-433a-9fa0-6592a5a75fa4" width="100%" autoplay loop muted playsinline></video>
     </td>
   </tr>
+    <td width="50%" align="center"><b>7. Preview Flyout</b><br/><br/>
+      <video src="https://github.com/user-attachments/assets/fe5a8b47-08c6-4d32-92b6-bb4e0446a82a" width="100%" autoplay loop muted playsinline></video>
+    </td>
+  </tr>
 </table>
 
 ---
